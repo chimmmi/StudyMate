@@ -11,8 +11,11 @@ import { Button } from "../components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router";
+import api from "@/utils/axiosInstance";
 
 export default function Signup() {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,14 +25,29 @@ export default function Signup() {
   const [course, setCourse] = useState("");
   const [university, setUniversity] = useState("");
   const [usernameTaken, setUsernameTaken] = useState("");
-  const [fillAllFields, setFillAllFields] = useState("");
+  const [emailInUse, setEmailInUse] = useState("");
 
   const handleSelectChange = (value: string) => {
-    setUniversity(value); // Update the university state with the selected value
+    setUniversity(value);
   };
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Check if all fields are filled
+    if (
+      !firstName ||
+      !lastName ||
+      !username ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !course ||
+      !university
+    ) {
+      alert("Please fill in all fields.");
+      return;
+    }
 
     const submitData = {
       firstName,
@@ -41,28 +59,32 @@ export default function Signup() {
       course,
       university,
     };
-
+    // console.log(submitData);
     try {
       if (password !== confirmPassword) {
         alert("Passwords do not match.");
-        return; // Prevent form submission
+        return;
       }
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/signup",
-        submitData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await api.post(
+        "/auth/signup",
+        submitData);
+      // if user is registered successfully, redirect to home page
+      if (response.status === 200) {
+        navigate("/");
+      }
 
-      console.log(response);
       /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (error: any) {
-      setUsernameTaken(error.response?.data?.message || "An error occurred");
-      
-      console.log(error.message);
+      if (error.response?.data?.id === "2") {
+        setEmailInUse(error.response?.data?.message || "An error occurred");
+      } else {
+        setEmailInUse("");
+      }
+      if (error.response?.data?.id === "1") {
+        setUsernameTaken(error.response?.data?.message || "An error occurred");
+      } else {
+        setUsernameTaken("");
+      }
     }
   };
 
@@ -70,14 +92,13 @@ export default function Signup() {
     <>
       <div>
         <img
-          src="public/logo.svg"
+          src="/logo.svg" // Corrected path
           alt="logo"
           width={65}
           height={50}
-          className="absolute top-[7.8%] left-[66%] lg:left-[55.5%] lg:top-[7.8%]"
+          className="absolute top-[8.5%] left-[55.5%]"
         />
-
-        <h1 className="text_shadow text-[#FFF5E5] text-center relative text-[3rem] font-extrabold pt-[6rem]">
+        <h1 className="jetbrains_medium text_shadow text-[#FFF5E5] text-center relative text-[3rem] font-extrabold pt-[6rem]">
           StudyMate.com
         </h1>
       </div>
@@ -90,12 +111,22 @@ export default function Signup() {
           <Input
             type="text"
             placeholder="First Name..."
-            onChange={(e) => setFirstName(e.target.value)}
+            onChange={(e) =>
+              setFirstName(
+                e.target.value.charAt(0).toUpperCase() +
+                  e.target.value.slice(1).toLowerCase()
+              )
+            }
           />
           <Input
             type="text"
             placeholder="Last Name..."
-            onChange={(e) => setLastName(e.target.value)}
+            onChange={(e) =>
+              setLastName(
+                e.target.value.charAt(0).toUpperCase() +
+                  e.target.value.slice(1).toLowerCase()
+              )
+            }
           />
 
           {usernameTaken && (
@@ -112,6 +143,11 @@ export default function Signup() {
               setUsernameTaken(""); // Clear error when user starts typing
             }}
           />
+          {emailInUse && (
+            <span className="absolute right-0 top-[25%] text-red-400">
+              {emailInUse}
+            </span>
+          )}
           <Input
             type="email"
             placeholder="Email..."
@@ -161,6 +197,7 @@ export default function Signup() {
               </SelectGroup>
             </SelectContent>
           </Select>
+
           <Button
             type="submit"
             className="col-span-2 justify-self-center box_shadow bg-[#6170A9] hover:bg-slate-600 transition-all duration-300 ease-in-out cursor-pointer w-[10rem] text-[16px]"

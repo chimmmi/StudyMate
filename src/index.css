@@ -126,8 +126,7 @@
 }
 
 .jetbrains_extrabold {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 800;
+  color: red
 }
 
 .jetbrains_bold {
@@ -137,12 +136,12 @@
 
 .jetbrains_medium {
   font-family: 'JetBrains Mono', monospace;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .jetBrains_thin {
   font-family: 'JetBrains Mono', monospace;
-  font-weight: #4E4852;
+  font-weight: 100;
 }
 
 body {
@@ -157,3 +156,4 @@ body {
 .box_shadow {
   box-shadow: 3px 5px 1px rgba(0, 0, 0, 0.26);
 }
+
